@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html data-theme="dracula">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <title>Weather</title>
+</head>
+<body class="bg-neutral text-white">
+
+<div class="container mx-auto p-4">
+    <h1 class="text-4xl font-bold mb-4 text-center">Weather</h1>
+    <div class="flex justify-center mb-4">
+        <input id="city-input" type="text" placeholder="ค้นหาชื่อเมือง" class="input input-bordered w-full max-w-xs" />
+        <button id="search-button" class="btn btn-primary ml-2">ค้นหา</button>
+    </div>
+    <div id="weather-data" class="hidden">
+        <div class="card bg-gray-600 p-4">
+            <h2 id="city-name" class="text-2xl font-bold mb-2"></h2>
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-2 md:mb-0">
+                    <p>อุณหภูมิ : <span id="temperature"></span></p>
+                    <p>ความเร็วลม : <span id="wind"></span></p>
+                    <p>ความชื้น : <span id="humidity"></span></p>
+                </div>
+                <div>
+                    <img id="weather-icon" src="" alt="Weather Icon" class="w-20 h-20"/>
+                </div>
+            </div>
+            <div id="radar-map" class="mt-4">
+                <iframe src="" width="100%" height="650" frameborder="0" class="rounded"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const apiKey = '6cd09f89a0009e6a31c3bcbf35ad4f2b';
+
+    document.getElementById('search-button').addEventListener('click', () => {
+        const city = document.getElementById('city-input').value;
+        getWeatherData(city);
+    });
+
+    async function getWeatherData(city) {
+        try {
+            const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+            const data = response.data;
+
+            document.getElementById('city-name').textContent = data.name;
+            document.getElementById('temperature').textContent = `${data.main.temp} °C`;
+            document.getElementById('wind').textContent = `${data.wind.speed} m/s`;
+            document.getElementById('humidity').textContent = `${data.main.humidity} %`;
+            document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+            const radarMap = document.getElementById('radar-map').querySelector('iframe');
+            radarMap.src = `https://embed.windy.com/embed2.html?lat=${data.coord.lat}&lon=${data.coord.lon}&detailLat=${data.coord.lat}&detailLon=${data.coord.lon}&zoom=5&level=surface&overlay=radar&product=radar&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1`;
+
+            document.getElementById('weather-data').classList.remove('hidden');
+        } catch (error) {
+            console.error('Error fetching weather data:', error);
+        }
+    }
+</script>
+
+</body>
+</html>
+
